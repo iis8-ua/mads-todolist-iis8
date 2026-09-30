@@ -1,29 +1,5 @@
-# Aplicación inicial ToDoList
+# Trello
+https://trello.com/invite/b/6abcdc4d7b1b63a6a9ae9a69/ATTIfdeca494cef53871362626024ec9d9aa8C3CC0C8/todolist-mads
 
-Aplicación ToDoList de la asignatura [MADS](https://cvnet.cpd.ua.es/Guia-Docente/GuiaDocente/Index?wcodest=C203&wcodasi=34037&wlengua=es&scaca=2019-20) usando Spring Boot y plantillas Thymeleaf.
-
-## Requisitos
-
-Necesitas tener instalado en tu sistema:
-
-- Java 8
-
-## Ejecución
-
-Puedes ejecutar la aplicación usando el _goal_ `run` del _plugin_ Maven 
-de Spring Boot:
-
-```
-$ ./mvnw spring-boot:run 
-```   
-
-También puedes generar un `jar` y ejecutarlo:
-
-```
-$ ./mvnw package
-$ java -jar target/mads-todolist-inicial-0.0.1-SNAPSHOT.jar 
-```
-
-Una vez lanzada la aplicación puedes abrir un navegador y probar la página de inicio:
-
-- [http://localhost:8080/login](http://localhost:8080/login)
+# Docker
+https://hub.docker.com/r/israelizqdo9/mads-todolist
