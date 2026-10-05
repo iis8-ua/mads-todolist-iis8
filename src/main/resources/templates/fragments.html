@@ -7,6 +7,24 @@
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
 </head>
 
+<nav th:fragment="menuAnonimo" class="navbar navbar-expand-lg navbar-light bg-light">
+
+    <a class="navbar-brand" th:href="@{/about}">
+        ToDoList
+    </a>
+
+    <div class="navbar-nav ml-auto">
+        <a class="nav-item nav-link" th:href="@{/login}">
+            Login
+        </a>
+
+        <a class="nav-item nav-link" th:href="@{/registro}">
+            Registro
+        </a>
+    </div>
+
+</nav>
+
 <nav th:fragment="menu" class="navbar navbar-expand-lg navbar-light bg-light">
 
     <a class="navbar-brand" th:href="@{/about}">
