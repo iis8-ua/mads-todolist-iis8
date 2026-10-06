@@ -256,4 +256,44 @@ public class UsuarioServiceTest {
         //assert
         assertThat(usuarioService.esAdministrador(registrado.getId())).isFalse();
     }
+
+    @Test
+    public void servicioBloqueaUsuario() {
+        //arrange
+        UsuarioData usuario = new UsuarioData();
+        usuario.setEmail("user@ua");
+        usuario.setPassword("1234");
+        usuario.setBloqueado(false);
+
+        UsuarioData registrado = usuarioService.registrar(usuario);
+
+        //act
+        usuarioService.cambiarEstadoBloqueo(registrado.getId());
+
+        UsuarioData bloqueado = usuarioService.findById(registrado.getId());
+
+        //assert
+        assertThat(bloqueado.isBloqueado()).isTrue();
+    }
+
+    @Test
+    public void servicioHabilitaUsuario() {
+        //arrange
+        UsuarioData usuario = new UsuarioData();
+        usuario.setEmail("user@ua");
+        usuario.setNombre("Usuario");
+        usuario.setPassword("1234");
+        usuario.setBloqueado(true);
+
+        UsuarioData registrado = usuarioService.registrar(usuario);
+
+        //act
+        usuarioService.cambiarEstadoBloqueo(registrado.getId());
+
+        UsuarioData habilitado = usuarioService.findById(registrado.getId());
+
+        //assert
+        assertThat(habilitado).isNotNull();
+        assertThat(habilitado.isBloqueado()).isFalse();
+    }
 }
