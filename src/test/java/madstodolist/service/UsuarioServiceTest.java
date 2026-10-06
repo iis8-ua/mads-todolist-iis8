@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -152,5 +154,25 @@ public class UsuarioServiceTest {
         assertThat(usuario.getId()).isEqualTo(usuarioId);
         assertThat(usuario.getEmail()).isEqualTo("user@ua");
         assertThat(usuario.getNombre()).isEqualTo("Usuario Ejemplo");
+    }
+
+    @Test
+    public void servicioConsultaTodosLosUsuarios() {
+        //arrange
+        addUsuarioBD();
+
+        UsuarioData usuario2 = new UsuarioData();
+        usuario2.setEmail("user2@ua");
+        usuario2.setNombre("Segundo Usuario");
+        usuario2.setPassword("123");
+        usuarioService.registrar(usuario2);
+
+        //act
+        List<UsuarioData> usuarios = usuarioService.todosUsuarios();
+
+        //assert
+        assertThat(usuarios).hasSize(2);
+        assertThat(usuarios).extracting(UsuarioData::getEmail)
+                .containsExactlyInAnyOrder("user@ua", "user2@ua");
     }
 }
