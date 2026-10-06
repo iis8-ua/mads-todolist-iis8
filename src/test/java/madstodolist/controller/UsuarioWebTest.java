@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.*;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -301,5 +302,107 @@ public class UsuarioWebTest {
         mockMvc.perform(get("/registrados/2"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("user@ua")));
+    }
+
+    @Test
+    public void administradorPuedeBloquearUsuario() throws Exception {
+        //arrange
+        when(managerUserSession.usuarioLogeado()).thenReturn(1L);
+        when(usuarioService.esAdministrador(1L)).thenReturn(true);
+
+        //act y assert
+        mockMvc.perform(post("/registrados/2/bloqueo"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/registrados"));
+    }
+
+    @Test
+    public void administradorPuedeHabilitarUsuario() throws Exception {
+        //arrange
+        when(managerUserSession.usuarioLogeado()).thenReturn(1L);
+        when(usuarioService.esAdministrador(1L)).thenReturn(true);
+
+        //act y assert
+        mockMvc.perform(post("/registrados/2/bloqueo"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/registrados"));
+    }
+
+    @Test
+    public void usuarioNormalNoPuedeBloquearUsuario() throws Exception {
+        //arrange
+        when(managerUserSession.usuarioLogeado()).thenReturn(2L);
+        when(usuarioService.esAdministrador(2L)).thenReturn(false);
+
+        //act y assert
+        mockMvc.perform(post("/registrados/3/bloqueo"))
+                .andExpect(status().isForbidden())
+                .andExpect(result ->
+                        assertThat(
+                                result.getResolvedException().getMessage(),
+                                containsString("No tienes permisos suficientes")
+                        )
+                );
+    }
+
+    @Test
+    public void usuarioNoLogueadoNoPuedeBloquearUsuario() throws Exception {
+        //arrange
+        when(managerUserSession.usuarioLogeado()).thenReturn(null);
+
+        //act y assert
+        mockMvc.perform(post("/registrados/2/bloqueo"))
+                .andExpect(status().isForbidden())
+                .andExpect(result ->
+                        assertThat(
+                                result.getResolvedException().getMessage(),
+                                containsString("No tienes permisos suficientes")
+                        )
+                );
+    }
+
+    @Test
+    public void servicioLoginUsuarioBloqueado() throws Exception {
+        //arrange
+        UsuarioData usuario = new UsuarioData();
+        usuario.setId(2L);
+        usuario.setEmail("user@ua");
+        usuario.setNombre("Usuario");
+        usuario.setBloqueado(true);
+
+        when(usuarioService.login("user@ua", "1234"))
+                .thenReturn(UsuarioService.LoginStatus.USER_BLOCKED);
+
+        //act y assert
+        mockMvc.perform(post("/login")
+                        .param("eMail", "user@ua")
+                        .param("password", "1234"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(
+                        containsString("El acceso de este usuario está bloqueado")
+                ));
+    }
+
+    @Test
+    public void servicioLoginUsuarioHabilitado() throws Exception {
+        //Arrange
+        UsuarioData usuario = new UsuarioData();
+        usuario.setId(2L);
+        usuario.setEmail("user@ua");
+        usuario.setNombre("Usuario");
+        usuario.setBloqueado(false);
+
+        when(usuarioService.login("user@ua", "1234"))
+                .thenReturn(UsuarioService.LoginStatus.LOGIN_OK);
+
+        when(usuarioService.findByEmail("user@ua"))
+                .thenReturn(usuario);
+
+        //act y assert
+        mockMvc.perform(post("/login")
+                        .param("eMail", "user@ua")
+                        .param("password", "1234"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/usuarios/2/tareas"));
     }
 }

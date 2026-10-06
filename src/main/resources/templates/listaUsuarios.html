@@ -39,6 +39,24 @@
                         </a>
                     </td>
 
+                    <td>
+                        <form th:action="@{/registrados/{id}/bloqueo(id=${usuario.id})}" method="post">
+
+                            <button type="submit"
+                                    class="btn btn-danger btn-xs"
+                                    th:if="${!usuario.bloqueado}">
+                                Bloquear
+                            </button>
+
+                            <button type="submit"
+                                    class="btn btn-success btn-xs"
+                                    th:if="${usuario.bloqueado}">
+                                Habilitar
+                            </button>
+
+                        </form>
+                    </td>
+
                 </tr>
 
                 </tbody>
