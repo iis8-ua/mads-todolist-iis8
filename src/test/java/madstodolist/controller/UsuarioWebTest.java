@@ -9,8 +9,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -92,5 +99,51 @@ public class UsuarioWebTest {
                         .param("eMail","ana.garcia@gmail.com")
                         .param("password","000"))
                 .andExpect(content().string(containsString("Contraseña incorrecta")));
+    }
+
+    @Test
+    public void getRegistradosMuestraUsuarios() throws Exception {
+        //arrange
+        UsuarioData usuario1 = new UsuarioData();
+        usuario1.setId(1L);
+        usuario1.setEmail("user1@ua");
+        usuario1.setNombre("Usuario 1");
+
+        UsuarioData usuario2 = new UsuarioData();
+        usuario2.setId(2L);
+        usuario2.setEmail("user2@ua");
+        usuario2.setNombre("Usuario 2");
+
+        when(usuarioService.todosUsuarios())
+                .thenReturn(Arrays.asList(usuario1, usuario2));
+
+        //act y assert
+        this.mockMvc.perform(get("/registrados"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(allOf(
+                        containsString("1"),
+                        containsString("user1@ua"),
+                        containsString("2"),
+                        containsString("user2@ua")
+                )));
+    }
+
+    @Test
+    public void getRegistradosMuestraEnlacesDescripcion() throws Exception {
+        //arrange
+        UsuarioData usuario = new UsuarioData();
+        usuario.setId(1L);
+        usuario.setEmail("user@ua");
+        usuario.setNombre("Usuario Ejemplo");
+
+        when(usuarioService.todosUsuarios())
+                .thenReturn(Collections.singletonList(usuario));
+
+        //act y assert
+        this.mockMvc.perform(get("/registrados"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(
+                        containsString("/usuarios/1")
+                ));
     }
 }
