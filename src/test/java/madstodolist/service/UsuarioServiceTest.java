@@ -10,6 +10,7 @@ import org.springframework.test.context.jdbc.Sql;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
 @Sql(scripts = "/clean-db.sql")
@@ -183,5 +184,44 @@ public class UsuarioServiceTest {
 
         //assert
         assertThat(usuario).isNull();
+    }
+
+    @Test
+    public void servicioRegistraUsuarioAdministrador() {
+        //arrange
+        UsuarioData usuario = new UsuarioData();
+        usuario.setEmail("admin@ua");
+        usuario.setNombre("Administrador");
+        usuario.setPassword("123");
+        usuario.setAdministrador(true);
+
+        //act
+        UsuarioData registrado = usuarioService.registrar(usuario);
+
+        //assert
+        assertThat(registrado).isNotNull();
+        assertThat(registrado.isAdministrador()).isTrue();
+    }
+
+    @Test
+    public void servicioNoPermiteDosAdministradores() {
+        //arrange
+        UsuarioData admin1 = new UsuarioData();
+        admin1.setEmail("admin1@ua");
+        admin1.setNombre("Admin 1");
+        admin1.setPassword("123");
+        admin1.setAdministrador(true);
+
+        //act
+        usuarioService.registrar(admin1);
+
+        UsuarioData admin2 = new UsuarioData();
+        admin2.setEmail("admin2@ua");
+        admin2.setNombre("Admin 2");
+        admin2.setPassword("123");
+        admin2.setAdministrador(true);
+
+        //assert
+        assertThatThrownBy(() -> usuarioService.registrar(admin2)).isInstanceOf(UsuarioServiceException.class);
     }
 }
