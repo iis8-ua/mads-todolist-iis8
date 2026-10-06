@@ -224,4 +224,36 @@ public class UsuarioServiceTest {
         //assert
         assertThatThrownBy(() -> usuarioService.registrar(admin2)).isInstanceOf(UsuarioServiceException.class);
     }
+
+    @Test
+    public void servicioCompruebaSiUsuarioEsAdministrador() {
+        //arrange
+        UsuarioData admin = new UsuarioData();
+        admin.setEmail("admin@ua");
+        admin.setNombre("Administrador");
+        admin.setPassword("1234");
+        admin.setAdministrador(true);
+
+        //act
+        UsuarioData registrado = usuarioService.registrar(admin);
+
+        //assert
+        assertThat(usuarioService.esAdministrador(registrado.getId())).isTrue();
+    }
+
+    @Test
+    public void servicioCompruebaSiUsuarioNoEsAdministrador() {
+        //arrange
+        UsuarioData usuario = new UsuarioData();
+        usuario.setEmail("user@ua");
+        usuario.setNombre("Usuario");
+        usuario.setPassword("1234");
+        usuario.setAdministrador(false);
+
+        //act
+        UsuarioData registrado = usuarioService.registrar(usuario);
+
+        //assert
+        assertThat(usuarioService.esAdministrador(registrado.getId())).isFalse();
+    }
 }
