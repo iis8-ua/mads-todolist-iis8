@@ -175,4 +175,13 @@ public class UsuarioServiceTest {
         assertThat(usuarios).extracting(UsuarioData::getEmail)
                 .containsExactlyInAnyOrder("user@ua", "user2@ua");
     }
+
+    @Test
+    public void servicioConsultaUsuarioNoExistenteDevuelveNull() {
+        //arrange y act
+        UsuarioData usuario = usuarioService.findById(999L);
+
+        //assert
+        assertThat(usuario).isNull();
+    }
 }
