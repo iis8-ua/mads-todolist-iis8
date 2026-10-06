@@ -92,4 +92,9 @@ public class UsuarioService {
     public boolean existeAdministrador() {
         return usuarioRepository.existsByAdministradorTrue();
     }
+
+    @Transactional(readOnly = true)
+    public boolean esAdministrador(Long usuarioId) {
+        return usuarioRepository.existsByIdAndAdministradorTrue(usuarioId);
+    }
 }
