@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
     Optional<Usuario> findByEmail(String s);
     boolean existsByAdministradorTrue();
+    boolean existsByIdAndAdministradorTrue(Long id);
 }

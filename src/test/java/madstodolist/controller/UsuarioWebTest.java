@@ -1,5 +1,6 @@
 package madstodolist.controller;
 
+import madstodolist.authentication.ManagerUserSession;
 import madstodolist.dto.UsuarioData;
 import madstodolist.service.UsuarioService;
 import org.junit.jupiter.api.Test;
@@ -9,10 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
@@ -30,6 +28,9 @@ public class UsuarioWebTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    ManagerUserSession managerUserSession;
 
     // Moqueamos el usuarioService.
     // En los tests deberemos proporcionar el valor devuelto por las llamadas
@@ -248,5 +249,57 @@ public class UsuarioWebTest {
                         .param("password", "1234"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/registrados"));
+    }
+
+    @Test
+    public void administradorPuedeAccederAListaUsuarios() throws Exception {
+        //arrange
+        when(managerUserSession.usuarioLogeado()).thenReturn(1L);
+        when(usuarioService.esAdministrador(1L)).thenReturn(true);
+        when(usuarioService.todosUsuarios()).thenReturn(new ArrayList<>());
+
+        //act y assert
+        mockMvc.perform(get("/registrados"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void usuarioNoAdministradorNoPuedeAccederAListaUsuarios() throws Exception {
+        //arrange
+        when(managerUserSession.usuarioLogeado()).thenReturn(1L);
+        when(usuarioService.esAdministrador(1L)).thenReturn(false);
+
+        //act y assert
+        mockMvc.perform(get("/registrados"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void usuarioNoAdministradorNoPuedeAccederADescripcion() throws Exception {
+        //arrange
+        when(managerUserSession.usuarioLogeado()).thenReturn(1L);
+        when(usuarioService.esAdministrador(1L)).thenReturn(false);
+
+        //act y assert
+        mockMvc.perform(get("/registrados/2"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void administradorPuedeAccederADescripcion() throws Exception {
+        //arrange
+        UsuarioData usuario = new UsuarioData();
+        usuario.setId(2L);
+        usuario.setEmail("user@ua");
+        usuario.setNombre("Usuario");
+
+        when(managerUserSession.usuarioLogeado()).thenReturn(1L);
+        when(usuarioService.esAdministrador(1L)).thenReturn(true);
+        when(usuarioService.findById(2L)).thenReturn(usuario);
+
+        //act y assert
+        mockMvc.perform(get("/registrados/2"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("user@ua")));
     }
 }
