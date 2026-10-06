@@ -146,4 +146,61 @@ public class UsuarioWebTest {
                         containsString("/usuarios/1")
                 ));
     }
+
+    @Test
+    public void getDescripcionUsuarioMuestraDatos() throws Exception {
+        //arrange
+        UsuarioData usuario = new UsuarioData();
+        usuario.setId(1L);
+        usuario.setEmail("user@ua");
+        usuario.setNombre("Usuario Ejemplo");
+
+        when(usuarioService.findById(1L))
+                .thenReturn(usuario);
+
+        //act y assert
+        this.mockMvc.perform(get("/registrados/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(allOf(
+                        containsString("1"),
+                        containsString("user@ua"),
+                        containsString("Usuario Ejemplo")
+                )));
+    }
+
+    @Test
+    public void getDescripcionUsuarioNoExistenteRedirigeARegistrados() throws Exception {
+        //arrange
+        when(usuarioService.findById(999L))
+                .thenReturn(null);
+
+        //act y assert
+        this.mockMvc.perform(get("/registrados/999"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/registrados"));
+    }
+
+    @Test
+    public void getDescripcionUsuarioNoMuestraPassword() throws Exception {
+        //arrange
+        UsuarioData usuario = new UsuarioData();
+        usuario.setId(1L);
+        usuario.setEmail("user@ua");
+        usuario.setNombre("Usuario Ejemplo");
+        usuario.setPassword("123456");
+
+        when(usuarioService.findById(1L))
+                .thenReturn(usuario);
+
+        //act y assert
+        this.mockMvc.perform(get("/registrados/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(allOf(
+                        containsString("user@ua"),
+                        containsString("Usuario Ejemplo")
+                )))
+                .andExpect(content().string(
+                        org.hamcrest.Matchers.not(containsString("123456"))
+                ));
+    }
 }
