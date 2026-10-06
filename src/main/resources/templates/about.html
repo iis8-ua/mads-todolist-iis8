@@ -4,6 +4,14 @@
 <head th:replace="fragments :: head (titulo='Acerca de')"></head>
 
 <body>
+<div th:if="${usuario != null}">
+    <div th:replace="fragments :: menu"></div>
+</div>
+
+<div th:if="${usuario == null}">
+    <div th:replace="fragments :: menuAnonimo"></div>
+</div>
+
 <div class="container-fluid">
     <div class="container-fluid">
         <h1>ToDoList</h1>
