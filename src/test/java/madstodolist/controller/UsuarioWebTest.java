@@ -14,8 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -200,7 +199,54 @@ public class UsuarioWebTest {
                         containsString("Usuario Ejemplo")
                 )))
                 .andExpect(content().string(
-                        org.hamcrest.Matchers.not(containsString("123456"))
+                        not(containsString("123456"))
                 ));
+    }
+
+    @Test
+    public void getRegistroMuestraCheckboxAdministrador() throws Exception {
+        //arrange
+        when(usuarioService.existeAdministrador()).thenReturn(false);
+
+        //act y assert
+        mockMvc.perform(get("/registro"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Registrarse como administrador")))
+                .andExpect(content().string(containsString("id=\"administrador\"")));
+    }
+
+    @Test
+    public void getRegistroNoMuestraCheckboxSiExisteAdministrador() throws Exception {
+        //arrange
+        when(usuarioService.existeAdministrador()).thenReturn(true);
+
+        //act y assert
+        mockMvc.perform(get("/registro"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("Registrarse como administrador"))))
+                .andExpect(content().string(not(containsString("id=\"administrador\""))));
+    }
+
+    @Test
+    public void servicioLoginAdministradorRedirigeARegistrados() throws Exception {
+        //arrange
+        UsuarioData administrador = new UsuarioData();
+        administrador.setId(1L);
+        administrador.setEmail("admin@ua");
+        administrador.setNombre("Administrador");
+        administrador.setAdministrador(true);
+
+        when(usuarioService.login("admin@ua", "1234"))
+                .thenReturn(UsuarioService.LoginStatus.LOGIN_OK);
+
+        when(usuarioService.findByEmail("admin@ua"))
+                .thenReturn(administrador);
+
+        //act y assert
+        mockMvc.perform(post("/login")
+                        .param("eMail", "admin@ua")
+                        .param("password", "1234"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/registrados"));
     }
 }

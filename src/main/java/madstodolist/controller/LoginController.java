@@ -47,6 +47,9 @@ public class LoginController {
 
             managerUserSession.logearUsuario(usuario.getId());
 
+            if (usuario.isAdministrador()) {
+                return "redirect:/registrados";
+            }
             return "redirect:/usuarios/" + usuario.getId() + "/tareas";
         } else if (loginStatus == UsuarioService.LoginStatus.USER_NOT_FOUND) {
             model.addAttribute("error", "No existe usuario");
@@ -61,27 +64,31 @@ public class LoginController {
     @GetMapping("/registro")
     public String registroForm(Model model) {
         model.addAttribute("registroData", new RegistroData());
+        model.addAttribute("puedeSerAdministrador", !usuarioService.existeAdministrador());
         return "formRegistro";
     }
 
    @PostMapping("/registro")
    public String registroSubmit(@Valid RegistroData registroData, BindingResult result, Model model) {
 
-        if (result.hasErrors()) {
-            return "formRegistro";
-        }
+       if (result.hasErrors()) {
+           model.addAttribute("puedeSerAdministrador", !usuarioService.existeAdministrador());
+           return "formRegistro";
+       }
 
-        if (usuarioService.findByEmail(registroData.getEmail()) != null) {
-            model.addAttribute("registroData", registroData);
-            model.addAttribute("error", "El usuario " + registroData.getEmail() + " ya existe");
-            return "formRegistro";
-        }
+       if (usuarioService.findByEmail(registroData.getEmail()) != null) {
+           model.addAttribute("registroData", registroData);
+           model.addAttribute("puedeSerAdministrador", !usuarioService.existeAdministrador());
+           model.addAttribute("error", "El usuario " + registroData.getEmail() + " ya existe");
+           return "formRegistro";
+       }
 
         UsuarioData usuario = new UsuarioData();
         usuario.setEmail(registroData.getEmail());
         usuario.setPassword(registroData.getPassword());
         usuario.setFechaNacimiento(registroData.getFechaNacimiento());
         usuario.setNombre(registroData.getNombre());
+       usuario.setAdministrador(registroData.isAdministrador());
 
         usuarioService.registrar(usuario);
         return "redirect:/login";
