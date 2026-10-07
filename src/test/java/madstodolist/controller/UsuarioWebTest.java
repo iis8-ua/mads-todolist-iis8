@@ -105,6 +105,11 @@ public class UsuarioWebTest {
     @Test
     public void getRegistradosMuestraUsuarios() throws Exception {
         //arrange
+        UsuarioData usuarioLogueado = new UsuarioData();
+        usuarioLogueado.setId(1L);
+        usuarioLogueado.setNombre("Administrador");
+
+        when(usuarioService.findById(1L)).thenReturn(usuarioLogueado);
         when(managerUserSession.usuarioLogeado()).thenReturn(1L);
         when(usuarioService.esAdministrador(1L)).thenReturn(true);
 
@@ -128,6 +133,7 @@ public class UsuarioWebTest {
         usuario.setEmail("user@ua");
         usuario.setNombre("Usuario Ejemplo");
 
+        when(usuarioService.findById(1L)).thenReturn(usuario);
         when(managerUserSession.usuarioLogeado()).thenReturn(1L);
         when(usuarioService.esAdministrador(1L)).thenReturn(true);
         when(usuarioService.todosUsuarios())
@@ -253,6 +259,11 @@ public class UsuarioWebTest {
     @Test
     public void administradorPuedeAccederAListaUsuarios() throws Exception {
         //arrange
+        UsuarioData administrador = new UsuarioData();
+        administrador.setId(1L);
+        administrador.setNombre("Administrador");
+
+        when(usuarioService.findById(1L)).thenReturn(administrador);
         when(managerUserSession.usuarioLogeado()).thenReturn(1L);
         when(usuarioService.esAdministrador(1L)).thenReturn(true);
         when(usuarioService.todosUsuarios()).thenReturn(new ArrayList<>());
@@ -292,6 +303,11 @@ public class UsuarioWebTest {
         usuario.setEmail("user@ua");
         usuario.setNombre("Usuario");
 
+        UsuarioData administrador = new UsuarioData();
+        administrador.setId(1L);
+        administrador.setNombre("Administrador");
+
+        when(usuarioService.findById(1L)).thenReturn(administrador);
         when(managerUserSession.usuarioLogeado()).thenReturn(1L);
         when(usuarioService.esAdministrador(1L)).thenReturn(true);
         when(usuarioService.findById(2L)).thenReturn(usuario);
