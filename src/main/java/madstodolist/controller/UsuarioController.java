@@ -34,7 +34,9 @@ public class UsuarioController {
         }
 
         List<UsuarioData> usuarios = usuarioService.todosUsuarios();
+        UsuarioData usuarioLogueado = usuarioService.findById(idUsuario);
         model.addAttribute("usuarios", usuarios);
+        model.addAttribute("usuarioLogueado", usuarioLogueado);
         return "listaUsuarios";
     }
 
@@ -49,6 +51,7 @@ public class UsuarioController {
             );
         }
 
+        UsuarioData usuarioLogueado = usuarioService.findById(idUsuario);
         UsuarioData usuario = usuarioService.findById(id);
 
         //se hace esto para que si no hay usuario se redirige a la misma ya que no hay nada que mostrar
@@ -56,6 +59,7 @@ public class UsuarioController {
             return "redirect:/registrados";
         }
 
+        model.addAttribute("usuarioLogueado", usuarioLogueado);
         model.addAttribute("usuario", usuario);
         return "descripcionUsuario";
     }
