@@ -43,6 +43,7 @@ public class TareaController {
 
         UsuarioData usuario = usuarioService.findById(idUsuario);
         model.addAttribute("usuario", usuario);
+        model.addAttribute("usuarioLogueado", usuario);
         return "formNuevaTarea";
     }
 
@@ -66,6 +67,7 @@ public class TareaController {
         UsuarioData usuario = usuarioService.findById(idUsuario);
         List<TareaData> tareas = tareaService.allTareasUsuario(idUsuario);
         model.addAttribute("usuario", usuario);
+        model.addAttribute("usuarioLogueado", usuario);
         model.addAttribute("tareas", tareas);
         return "listaTareas";
     }
@@ -79,8 +81,11 @@ public class TareaController {
             throw new TareaNotFoundException();
         }
 
+        UsuarioData usuarioLogueado = usuarioService.findById(tarea.getUsuarioId());
+
         comprobarUsuarioLogeado(tarea.getUsuarioId());
 
+        model.addAttribute("usuarioLogueado", usuarioLogueado);
         model.addAttribute("tarea", tarea);
         tareaData.setTitulo(tarea.getTitulo());
         return "formEditarTarea";

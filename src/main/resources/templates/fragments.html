@@ -33,7 +33,7 @@
 
     <div class="navbar-nav">
         <a class="nav-item nav-link"
-           th:href="@{/usuarios/{id}/tareas(id=${usuario.id})}">
+           th:href="@{/usuarios/{id}/tareas(id=${usuarioLogueado.id})}">
             Tareas
         </a>
     </div>
@@ -48,7 +48,7 @@
                data-toggle="dropdown"
                aria-haspopup="true"
                aria-expanded="false"
-               th:text="${usuario.nombre}">
+               th:text="${usuarioLogueado.nombre}">
                 Usuario
             </a>
 
@@ -61,7 +61,7 @@
 
                 <a class="dropdown-item"
                    th:href="@{/logout}"
-                   th:text="'Cerrar sesión ' + ${usuario.nombre}">
+                   th:text="'Cerrar sesión ' + ${usuarioLogueado.nombre}">
                     Cerrar sesión
                 </a>
 

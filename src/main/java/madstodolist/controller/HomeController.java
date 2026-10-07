@@ -24,6 +24,7 @@ public class HomeController {
         if (id != null) {
             UsuarioData usuario = usuarioService.findById(id);
             model.addAttribute("usuario", usuario);
+            model.addAttribute("usuarioLogueado", usuario);
         }
 
         return "about";
