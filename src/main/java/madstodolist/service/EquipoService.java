@@ -118,4 +118,22 @@ public class EquipoService {
         usuario.getEquipos().remove(equipo);
         equipoRepository.save(equipo);
     }
+
+    @Transactional
+    public EquipoData renombrarEquipo(Long id, String nuevoNombre) {
+        if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) {
+            throw new EquipoServiceException("El equipo no tiene nombre");
+        }
+        //si no existe ese equipo se lanza excepcion
+        Equipo equipo = equipoRepository.findById(id).orElseThrow(() -> new EquipoServiceException("No existe el equipo con id " + id));
+        String nombre = nuevoNombre.trim();
+        //si ya existe no cambiamos el nombre ya que no puede haber duplicados
+        boolean existe = equipoRepository.findAll().stream().anyMatch(e -> !e.getId().equals(id) && e.getNombre().equalsIgnoreCase(nombre));
+        if (existe) {
+            throw new EquipoServiceException("Ya existe un equipo con el nombre " + nombre);
+        }
+        equipo.setNombre(nombre);
+        equipoRepository.save(equipo);
+        return modelMapper.map(equipo, EquipoData.class);
+    }
 }
