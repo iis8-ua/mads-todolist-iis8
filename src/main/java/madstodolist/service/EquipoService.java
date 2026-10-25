@@ -71,4 +71,22 @@ public class EquipoService {
                 .map(usuario -> modelMapper.map(usuario, UsuarioData.class))
                 .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    //igual que el de arriba pero se hace al reves, de usuario a equipos
+    public List<EquipoData> equiposUsuario(Long id) {
+        Usuario usuario = usuarioRepository.findById(id).orElse(null);
+        if (usuario == null) {
+            return new ArrayList<>();
+        }
+        //una vez tengo el usuario se busca en los equipos de ese usuario con el metodo de Usuario
+        List<EquipoData> equiposData = new ArrayList<>();
+        for (Equipo equipo : usuario.getEquipos()) {
+            equiposData.add(modelMapper.map(equipo, EquipoData.class));
+        }
+        //se ordena para que salga igual que en el otro
+        equiposData.sort(Comparator.comparing(EquipoData::getNombre));
+
+        return equiposData;
+    }
 }
