@@ -35,6 +35,13 @@ public class EquipoService {
         if (nombre == null || nombre.trim().isEmpty()) {
             throw new EquipoServiceException("El equipo no tiene nombre");
         }
+
+        //si ya hay un equipo con el mismo nombre ya no deja
+        boolean existe = equipoRepository.findAll().stream().anyMatch(equipo -> equipo.getNombre().equalsIgnoreCase(nombre.trim()));
+        if (existe) {
+            throw new EquipoServiceException("Ya existe un equipo con el nombre " + nombre.trim());
+        }
+
         Equipo equipoNuevo = new Equipo(nombre);
         equipoNuevo = equipoRepository.save(equipoNuevo);
         return modelMapper.map(equipoNuevo, EquipoData.class);

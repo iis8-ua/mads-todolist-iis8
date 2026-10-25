@@ -14,6 +14,26 @@
         </div>
     </div>
 
+    <div class="row mt-2">
+        <div class="col">
+            <div class="alert alert-success alert-dismissible fade show" role="alert"
+                 th:if="${!#strings.isEmpty(mensaje)}">
+                <span th:text="${mensaje}"></span>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="alert alert-danger alert-dismissible fade show" role="alert"
+                 th:if="${!#strings.isEmpty(error)}">
+                <span th:text="${error}"></span>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="row mt-3">
         <div class="col">
             <p>
@@ -53,6 +73,26 @@
                 Este equipo no tiene miembros.
             </p>
 
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col">
+            <form th:if="${pertenece}"
+                  th:action="@{/equipos/{id}/salir(id=${equipo.id})}"
+                  method="post">
+                <button type="submit" class="btn btn-danger">
+                    Salir del equipo
+                </button>
+            </form>
+
+            <form th:unless="${pertenece}"
+                  th:action="@{/equipos/{id}/unirse(id=${equipo.id})}"
+                  method="post">
+                <button type="submit" class="btn btn-success">
+                    Unirme al equipo
+                </button>
+            </form>
         </div>
     </div>
 
