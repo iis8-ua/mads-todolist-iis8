@@ -64,6 +64,10 @@ public class EquipoService {
         //igual, si no existen el equipo o el usuario se lanza excepcion
         Equipo equipo = equipoRepository.findById(id).orElseThrow(() -> new EquipoServiceException("No existe el equipo con id " + id));
         Usuario usuario = usuarioRepository.findById(id1).orElseThrow(() -> new EquipoServiceException("No existe el usuario con id " + id1));
+        //si ya esta en el equipo no se vuelve a añadir
+        if (equipo.getUsuarios().contains(usuario)) {
+            throw new EquipoServiceException("El usuario ya pertenece al equipo");
+        }
         equipo.addUsuario(usuario);
     }
 
