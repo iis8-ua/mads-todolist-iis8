@@ -25,6 +25,7 @@
                     <th>Nombre</th>
                     <th>Miembros</th>
                     <th>Participación</th>
+                    <th th:if="${usuarioLogueado.administrador}">Gestión</th>
                 </tr>
                 </thead>
 
@@ -68,6 +69,18 @@
                         </form>
                     </td>
 
+                    <td th:if="${usuarioLogueado.administrador}">
+                        <a class="btn btn-primary btn-xs"
+                           th:href="@{/equipos/{id}/editar(id=${equipo.id})}">
+                            Cambiar nombre
+                        </a>
+
+                        <button class="btn btn-danger btn-xs" onmouseover="" style="cursor: pointer;"
+                                th:onclick="'borrarEquipo(\'/equipos/' + ${equipo.id} + '\')'">
+                            Eliminar
+                        </button>
+                    </td>
+
                 </tr>
 
                 </tbody>
@@ -108,6 +121,17 @@
 </div>
 
 <div th:replace="fragments::javascript"></div>
+
+<!-- Confirmación y petición DELETE para eliminar un equipo -->
+<script type="text/javascript">
+    function borrarEquipo(urlBorrar) {
+        if (confirm('¿Estás seguro/a de que quieres eliminar el equipo?')) {
+            fetch(urlBorrar, {
+                method: 'DELETE'
+            }).then((res) => location.reload());
+        }
+    }
+</script>
 
 </body>
 </html>

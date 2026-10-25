@@ -8,12 +8,11 @@ import madstodolist.service.EquipoService;
 import madstodolist.service.EquipoServiceException;
 import madstodolist.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -39,6 +38,18 @@ public class EquipoController {
             throw new UsuarioNoLogeadoException();
         }
         return usuarioService.findById(idUsuarioLogeado);
+    }
+
+    //igual que para los usuarios pero para ver si es admin
+    private UsuarioData comprobarAdministrador() {
+        UsuarioData usuarioLogueado = comprobarUsuarioLogeado();
+        if (!usuarioService.esAdministrador(usuarioLogueado.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No tienes permisos suficientes"
+            );
+        }
+        return usuarioLogueado;
     }
 
     //lista todos los equipos ordenados por nombre
@@ -124,5 +135,56 @@ public class EquipoController {
             flash.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/equipos";
+    }
+
+    //devuelve la vista para editar el equipo
+    @GetMapping("/equipos/{id}/editar")
+    public String formEditarEquipo(@PathVariable(value = "id") Long idEquipo, Model model) {
+        UsuarioData usuarioLogueado = comprobarAdministrador();
+
+        EquipoData equipo = equipoService.recuperarEquipo(idEquipo);
+        //se crea el equipo nuevo con los datos para pasarselo al formulario para editar luego
+        EquipoData equipoData = new EquipoData();
+        equipoData.setId(equipo.getId());
+        equipoData.setNombre(equipo.getNombre());
+
+        model.addAttribute("usuarioLogueado", usuarioLogueado);
+        model.addAttribute("equipo", equipo);
+        model.addAttribute("equipoData", equipoData);
+        return "formEditarEquipo";
+    }
+
+    //va a cambiar el nombre del equipo
+    @PostMapping("/equipos/{id}/editar")
+    public String editarEquipo(@PathVariable(value = "id") Long idEquipo, @ModelAttribute EquipoData equipoData, Model model, RedirectAttributes flash) {
+        UsuarioData usuarioLogueado = comprobarAdministrador();
+
+        try {
+            equipoService.renombrarEquipo(idEquipo, equipoData.getNombre());
+            flash.addFlashAttribute("mensaje", "Equipo renombrado correctamente");
+            return "redirect:/equipos";
+        }
+        catch (EquipoServiceException e) {
+            equipoData.setId(idEquipo);
+            model.addAttribute("usuarioLogueado", usuarioLogueado);
+            model.addAttribute("equipoData", equipoData);
+            model.addAttribute("error", e.getMessage());
+            return "formEditarEquipo";
+        }
+    }
+
+    //va a eliminar el equipo
+    @DeleteMapping("/equipos/{id}")
+    @ResponseBody
+    public String eliminarEquipo(@PathVariable(value = "id") Long idEquipo, RedirectAttributes flash) {
+        comprobarAdministrador();
+        try {
+            equipoService.eliminarEquipo(idEquipo);
+            flash.addFlashAttribute("mensaje", "Equipo eliminado correctamente");
+        }
+        catch (EquipoServiceException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        }
+        return "";
     }
 }

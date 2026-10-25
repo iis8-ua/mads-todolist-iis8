@@ -16,10 +16,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -40,9 +41,18 @@ public class EquipoWebTest {
     private ManagerUserSession managerUserSession;
 
     private Map<String, Long> addUsuarioEquipoBD() {
+        return addUsuarioEquipoBD(false);
+    }
+
+    private Map<String, Long> addAdminEquipoBD() {
+        return addUsuarioEquipoBD(true);
+    }
+
+    private Map<String, Long> addUsuarioEquipoBD(boolean administrador) {
         UsuarioData usuarioLogueado = new UsuarioData();
         usuarioLogueado.setEmail("admin@ua");
         usuarioLogueado.setPassword("123");
+        usuarioLogueado.setAdministrador(administrador);
         usuarioLogueado = usuarioService.registrar(usuarioLogueado);
 
         UsuarioData miembro1 = new UsuarioData();
@@ -64,6 +74,7 @@ public class EquipoWebTest {
         Map<String, Long> ids = new HashMap<>();
         ids.put("usuarioId", usuarioLogueado.getId());
         ids.put("equipoId", equipo.getId());
+        ids.put("miembro1Id", miembro1.getId());
         return ids;
     }
 
@@ -195,5 +206,45 @@ public class EquipoWebTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("formNuevoEquipo"))
                 .andExpect(content().string(containsString("El equipo no tiene nombre")));
+    }
+
+    @Test
+    public void renombrarEquipoWeb() throws Exception {
+        // GIVEN
+        Map<String, Long> ids = addAdminEquipoBD();
+
+        // WHEN
+        when(managerUserSession.usuarioLogeado()).thenReturn(ids.get("usuarioId"));
+
+        // THEN
+        this.mockMvc.perform(post("/equipos/" + ids.get("equipoId") + "/editar")
+                        .param("nombre", "Proyecto P2"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/equipos"))
+                .andExpect(flash().attribute("mensaje", "Equipo renombrado correctamente"));
+
+        this.mockMvc.perform(get("/equipos"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Proyecto P2")))
+                .andExpect(content().string(not(containsString("Proyecto P1"))));
+    }
+
+    @Test
+    public void eliminarEquipoWeb() throws Exception {
+        // GIVEN
+        Map<String, Long> ids = addAdminEquipoBD();
+
+        // WHEN
+        when(managerUserSession.usuarioLogeado()).thenReturn(ids.get("usuarioId"));
+
+        // THEN
+        this.mockMvc.perform(delete("/equipos/" + ids.get("equipoId")))
+                .andExpect(status().isOk());
+
+        this.mockMvc.perform(get("/equipos"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("Proyecto P1"))));
+
+        assertThat(equipoService.equiposUsuario(ids.get("miembro1Id"))).isEmpty();
     }
 }
