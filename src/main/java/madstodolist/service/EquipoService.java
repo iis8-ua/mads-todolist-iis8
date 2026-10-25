@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -117,5 +114,36 @@ public class EquipoService {
         equipo.getUsuarios().remove(usuario);
         usuario.getEquipos().remove(equipo);
         equipoRepository.save(equipo);
+    }
+
+    @Transactional
+    public EquipoData renombrarEquipo(Long id, String nuevoNombre) {
+        if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) {
+            throw new EquipoServiceException("El equipo no tiene nombre");
+        }
+        //si no existe ese equipo se lanza excepcion
+        Equipo equipo = equipoRepository.findById(id).orElseThrow(() -> new EquipoServiceException("No existe el equipo con id " + id));
+        String nombre = nuevoNombre.trim();
+        //si ya existe no cambiamos el nombre ya que no puede haber duplicados
+        boolean existe = equipoRepository.findAll().stream().anyMatch(e -> !e.getId().equals(id) && e.getNombre().equalsIgnoreCase(nombre));
+        if (existe) {
+            throw new EquipoServiceException("Ya existe un equipo con el nombre " + nombre);
+        }
+        equipo.setNombre(nombre);
+        equipoRepository.save(equipo);
+        return modelMapper.map(equipo, EquipoData.class);
+    }
+
+    @Transactional
+    public void eliminarEquipo(Long id) {
+        //si no existe ya no hay nada que eliminar
+        Equipo equipo = equipoRepository.findById(id).orElseThrow(() -> new EquipoServiceException("No existe el equipo con id " + id));
+
+        //hay que actualizar los dos lados de la relacion por eso este bucle sobre usuarios y luego el clear
+        for (Usuario usuario : new HashSet<>(equipo.getUsuarios())) {
+            usuario.getEquipos().remove(equipo);
+        }
+        equipo.getUsuarios().clear();
+        equipoRepository.delete(equipo);
     }
 }
