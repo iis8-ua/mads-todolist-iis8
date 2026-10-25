@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -135,5 +132,18 @@ public class EquipoService {
         equipo.setNombre(nombre);
         equipoRepository.save(equipo);
         return modelMapper.map(equipo, EquipoData.class);
+    }
+
+    @Transactional
+    public void eliminarEquipo(Long id) {
+        //si no existe ya no hay nada que eliminar
+        Equipo equipo = equipoRepository.findById(id).orElseThrow(() -> new EquipoServiceException("No existe el equipo con id " + id));
+
+        //hay que actualizar los dos lados de la relacion por eso este bucle sobre usuarios y luego el clear
+        for (Usuario usuario : new HashSet<>(equipo.getUsuarios())) {
+            usuario.getEquipos().remove(equipo);
+        }
+        equipo.getUsuarios().clear();
+        equipoRepository.delete(equipo);
     }
 }
