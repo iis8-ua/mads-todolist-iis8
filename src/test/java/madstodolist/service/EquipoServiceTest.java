@@ -131,5 +131,8 @@ public class EquipoServiceTest {
         // THEN
         List<UsuarioData> usuarios = equipoService.usuariosEquipo(equipo.getId());
         assertThat(usuarios).isEmpty();
+
+        List<EquipoData> equipos = equipoService.equiposUsuario(usuario.getId());
+        assertThat(equipos).isEmpty();
     }
 }
