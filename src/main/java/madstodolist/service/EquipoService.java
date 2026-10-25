@@ -93,4 +93,18 @@ public class EquipoService {
 
         return equiposData;
     }
+
+    @Transactional
+    public void eliminarUsuarioDeEquipo(Long id, Long id1) {
+        Equipo equipo = equipoRepository.findById(id).orElseThrow(() -> new EquipoServiceException("No existe el equipo con id " + id));
+        Usuario usuario = usuarioRepository.findById(id1).orElseThrow(() -> new EquipoServiceException("No existe el usuario con id " + id1));
+        //no tiene pq el usuario pertenecer a ese equipo
+        if (!equipo.getUsuarios().contains(usuario)) {
+            throw new EquipoServiceException("El usuario no pertenece al equipo");
+        }
+        //al ser una relacion muchos a muchos tengo que actualizar las dos partes de la relacion
+        equipo.getUsuarios().remove(usuario);
+        usuario.getEquipos().remove(equipo);
+        equipoRepository.save(equipo);
+    }
 }

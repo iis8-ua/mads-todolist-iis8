@@ -38,8 +38,6 @@ public class EquipoWebTest {
     @MockBean
     private ManagerUserSession managerUserSession;
 
-    // Crea en la BD un usuario logueado, un equipo y dos miembros del equipo.
-    // Devuelve los identificadores del usuario logueado y del equipo.
     private Map<String, Long> addUsuarioEquipoBD() {
         UsuarioData usuarioLogueado = new UsuarioData();
         usuarioLogueado.setEmail("admin@ua");
